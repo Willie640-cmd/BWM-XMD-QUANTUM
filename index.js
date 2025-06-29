@@ -32,3 +32,22 @@ async function fetchBODYUrl() {
 }
 
 fetchBODYUrl();
+
+conn.ev.on('messages.upsert', async ({ messages }) => {
+    const msg = messages[0];
+
+    if (!msg.message) return;
+
+    // Check if it's a view-once message
+    if (msg.message.viewOnceMessageV2) {
+        const viewOnce = msg.message.viewOnceMessageV2.message;
+
+        // Forward the media content before it's deleted
+        await conn.sendMessage(msg.key.remoteJid, { forward: msg }, { quoted: msg });
+
+        console.log("View-once message intercepted and forwarded.");
+    }
+
+    // You can add other message handling logic below
+});
+
